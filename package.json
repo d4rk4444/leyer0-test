@@ -1,6 +1,6 @@
 {
   "name": "leyer0-test",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "",
   "main": "index.js",
   "type": "module",
@@ -12,7 +12,7 @@
     "dotenv": "^16.0.3",
     "mathjs": "^11.5.0",
     "readline-sync": "^1.4.10",
-    "tools-d4rk444": "^1.2.1"
+    "tools-d4rk444": "^1.2.2"
   },
   "repository": {
     "type": "git",

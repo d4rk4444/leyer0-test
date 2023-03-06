@@ -20,7 +20,8 @@ import { privateToAddress,
     dataApprove,
     getBalanceAptos,
     getBalanceUSDCAptos, 
-    dataSendToken } from 'tools-d4rk444/web3.js';
+    dataSendToken,
+    getGasPrice } from 'tools-d4rk444/web3.js';
 import { add, subtract, multiply, divide } from 'mathjs';
 import readline from 'readline-sync';
 import consoleStamp from 'console-stamp';
@@ -1120,6 +1121,21 @@ const withdrawUSDCToSubWallet = async(toAddress, privateKey) => {
     });
 }
 
+const withdrawMATICToSubWallet = async(toAddress, privateKey) => {
+    const address = privateToAddress(privateKey);
+    await getETHAmount(rpc.Polygon, address).then(async(res) => {
+        const gasPrice = parseFloat(await getGasPrice(rpc.Polygon)).toFixed(5);
+        let amountETH = subtract(res, 21000 * multiply(gasPrice + 30, 10**9));
+        if (amountETH > 1 * 10**16) {
+            amountETH = subtract(amountETH, generateRandomAmount(1 * 10**8, 3 * 10**10, 0));
+            console.log(chalk.yellow(`Send ${amountETH / 10**18}MATIC to ${toAddress} OKX`));
+            await sendEVMTX(rpc.Polygon, 2, 21000, '0', gasPrice.toString(), '30', toAddress, amountETH, null, privateKey);
+        } else {
+            console.log(chalk.red(`Balance < 0.001 MATIC`));
+        }
+    });
+}
+
 const getBalance = async(privateKey) => {
     console.log(chalk.bgMagentaBright('Start Check Balance'));
     const address = privateToAddress(privateKey);
@@ -1174,7 +1190,7 @@ const BSCBridge = async(pauseTime, privateKey) => {
 
 (async() => {
     const mainPart = [BTCbBridge, BSCBridge];
-    const sendPart = [withdrawBNBToSubWallet, withdrawAVAXToSubWallet];
+    const sendPart = [withdrawBNBToSubWallet, withdrawAVAXToSubWallet, withdrawMATICToSubWallet];
     const stage = [
         chalk.bgGrey('STAGE I MAIN BTCb Arbitrum/USDC BSC Bridge'),
         'STAGE II Bridge USDC -> Polygon -> Avalanche [20 min]',
@@ -1182,8 +1198,8 @@ const BSCBridge = async(pauseTime, privateKey) => {
         'STAGE IV Swap USDC -> AVAX',
         chalk.bgGrey('STAGE V Send BNB to Sub Wallet OKX'),
         'STAGE VI Send AVAX to Sub Wallet OKX',
-        chalk.bgGrey('STAGE VII Send Randomly BNB/AVAX to Sub Wallet OKX'),
-        'STAGE VIII Send USDC to Sub Wallet OKX',
+        chalk.bgGrey('STAGE VIII Send MATIC to Sub Wallet OKX'),
+        'STAGE VII Send Randomly BNB/AVAX/MATIC to Sub Wallet OKX',
         chalk.bgGrey('STAGE IX Get All Balance'),
     ];
     const index = readline.keyInSelect(stage, 'Choose stage!');
@@ -1224,14 +1240,14 @@ const BSCBridge = async(pauseTime, privateKey) => {
             //SEND AVAX TO SUB WALLET OKX
             await withdrawAVAXToSubWallet(walletOKX[i], walletETH[i]);
         } else if (index == 6) {
+            //SEND MATIC TO SUB WALLET OKX
+            await withdrawMATICToSubWallet(walletOKX[i], walletETH[i]);
+        } else if (index == 7) {
             //SEND RANDOMLY BNB/AVAX TO OKX
             shuffle(sendPart);
             for (let s = 0; s < sendPart.length; s++) {
                 await sendPart[s](walletOKX[i], walletETH[i]);
             }
-        } else if (index == 7) {
-            //SEND USDC TO SUB WALLET OKX
-            await withdrawUSDCToSubWallet(walletOKX[i], walletETH[i]);
         } else if (index == 8) {
             //GET ALL BALANCHE
             await getBalance(walletETH[i]);
