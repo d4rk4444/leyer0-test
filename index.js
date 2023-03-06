@@ -1198,8 +1198,8 @@ const BSCBridge = async(pauseTime, privateKey) => {
         'STAGE IV Swap USDC -> AVAX',
         chalk.bgGrey('STAGE V Send BNB to Sub Wallet OKX'),
         'STAGE VI Send AVAX to Sub Wallet OKX',
-        chalk.bgGrey('STAGE VIII Send MATIC to Sub Wallet OKX'),
-        'STAGE VII Send Randomly BNB/AVAX/MATIC to Sub Wallet OKX',
+        chalk.bgGrey('STAGE VII Send MATIC to Sub Wallet OKX'),
+        'STAGE VIII Send Randomly BNB/AVAX/MATIC to Sub Wallet OKX',
         chalk.bgGrey('STAGE IX Get All Balance'),
     ];
     const index = readline.keyInSelect(stage, 'Choose stage!');
